@@ -102,6 +102,7 @@
   </div>
 
 <script>
+// --- Daten ---
 const HIST = {
   AAPL: Array.from({length:220}, (_,i)=> 150 + Math.sin(i/9)*4 + i*0.08 + (Math.random()-0.5)*1.6 ),
   MSFT: Array.from({length:220}, (_,i)=> 320 + Math.sin(i/7)*6 + i*0.11 + (Math.random()-0.5)*2.2 ),
@@ -110,6 +111,7 @@ const HIST = {
   AMZN: Array.from({length:220}, (_,i)=> 170 + Math.sin(i/8)*5 + i*0.07 + (Math.random()-0.5)*2 )
 };
 
+// --- State ---
 const S = {
   day: 200,
   cash: 10000,
@@ -118,19 +120,24 @@ const S = {
   history: []
 };
 
+// --- Utils (Euro-Format) ---
+function fmt(n){ return Number(n).toLocaleString('de-DE', {style:'currency', currency:'EUR'}); }
+const rnd = x => Math.round(x*100)/100;
+
+// --- Preise ---
+function price(t){ const arr=HIST[t]; return rnd(arr[Math.min(S.day, arr.length-1)]); }
+function pricePrev(t){ const arr=HIST[t]; return rnd(arr[Math.max(0, Math.min(S.day-1, arr.length-1))]); }
+
+// --- Init (mit robustem localStorage) ---
 (function init(){
-  const saved = JSON.parse(localStorage.getItem('kidpf')||'null');
-  if(saved){ Object.assign(S, saved); }
+  try {
+    const saved = JSON.parse(localStorage.getItem('kidpf')||'null');
+    if(saved){ Object.assign(S, saved); }
+  } catch (e) { /* ignore storage errors */ }
   document.querySelector('#seed').value = S.seed;
   updatePriceBadge();
   tick();
 })();
-
-const € = n => n.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-const rnd = x => Math.round(x*100)/100;
-
-function price(t){ const arr=HIST[t]; return rnd(arr[Math.min(S.day, arr.length-1)]); }
-function pricePrev(t){ const arr=HIST[t]; return rnd(arr[Math.max(0, Math.min(S.day-1, arr.length-1))]); }
 
 function portfolioValue(){
   let v = S.cash;
@@ -138,17 +145,17 @@ function portfolioValue(){
   return v;
 }
 
-function save(){ localStorage.setItem('kidpf', JSON.stringify(S)); }
+function save(){ try{ localStorage.setItem('kidpf', JSON.stringify(S)); } catch(e){} }
 
 function updatePriceBadge(){
   const t = document.querySelector('#ticker').value;
-  document.querySelector('#price').textContent = €(price(t));
+  document.querySelector('#price').textContent = fmt(price(t));
 }
 
 function render(){
-  document.querySelector('#cashStart').textContent = €(S.seed);
-  document.querySelector('#cash').textContent = €(S.cash);
-  document.querySelector('#total').textContent = €(portfolioValue());
+  document.querySelector('#cashStart').textContent = fmt(S.seed);
+  document.querySelector('#cash').textContent = fmt(S.cash);
+  document.querySelector('#total').textContent = fmt(portfolioValue());
 
   const tbody = document.querySelector('#rows');
   tbody.innerHTML = '';
@@ -162,10 +169,10 @@ function render(){
     tr.innerHTML = `
       <td><b>${t}</b></td>
       <td class="right">${lot.qty}</td>
-      <td class="right">${€(p)}</td>
-      <td class="right">${€(value)}</td>
-      <td class="right ${dayDelta>=0? 'value-up':'value-down' }">${dayDelta>=0?'+':''}${€(dayDelta)}</td>
-      <td class="right ${pl>=0? 'value-up':'value-down' }">${pl>=0?'+':''}${€(pl)}</td>
+      <td class="right">${fmt(p)}</td>
+      <td class="right">${fmt(value)}</td>
+      <td class="right ${dayDelta>=0? 'value-up':'value-down' }">${dayDelta>=0?'+':''}${fmt(dayDelta)}</td>
+      <td class="right ${pl>=0? 'value-up':'value-down' }">${pl>=0?'+':''}${fmt(pl)}</td>
       <td class="right"><button data-t="${t}" class="small">Alles verkaufen</button></td>
     `;
     tbody.appendChild(tr);
@@ -200,6 +207,7 @@ function tick(){
   save();
 }
 
+// --- Events ---
 document.querySelector('#ticker').addEventListener('change', updatePriceBadge);
 
 document.querySelector('#buy').addEventListener('click', ()=>{
