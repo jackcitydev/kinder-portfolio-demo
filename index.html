@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kinder-Portfolio – Spielgeld-Demo</title>
+  <style>
+    :root { --bg:#0b1220; --panel:#121a2b; --muted:#9fb0d0; --text:#e7eeff; --accent:#7cc0ff; }
+    * { box-sizing: border-box; }
+    body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial; background: linear-gradient(180deg, #0b1220, #0a0f1a); color:var(--text); }
+    header{ padding:24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,.06); }
+    h1{ font-size:20px; margin:0; letter-spacing:.2px; }
+    .wrap{ max-width:1100px; margin:0 auto; padding:24px; }
+    .grid{ display:grid; grid-template-columns: 1fr; gap:16px; }
+    @media(min-width:900px){ .grid{ grid-template-columns: 1.3fr .7fr; } }
+    .card{ background: var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+    .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    input, select, button{ background:#0a1326; color:var(--text); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px 12px; font-size:14px; }
+    button{ background:linear-gradient(180deg, #1a2a4a, #0d1a33); cursor:pointer; }
+    button:hover{ filter:brightness(1.1); }
+    table{ width:100%; border-collapse:collapse; margin-top:8px; }
+    th, td{ padding:10px; border-bottom:1px solid rgba(255,255,255,.06); text-align:left; font-size:14px; }
+    th{ color:var(--muted); font-weight:600; }
+    .muted{ color:var(--muted); }
+    .pill{ padding:4px 8px; border-radius:999px; background:#0d1933; font-size:12px; border:1px solid rgba(255,255,255,.1); }
+    .right{ text-align:right; }
+    .value-up{ color:#8be38b; }
+    .value-down{ color:#ff9b9b; }
+    .small{ font-size:12px; }
+    .notice{ font-size:12px; color:var(--muted); line-height:1.4; }
+    canvas{ width:100%; height:220px; background:#0a1326; border:1px solid rgba(255,255,255,.08); border-radius:12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📈 Kinder-Portfolio (Spielgeld)</h1>
+    <div class="row small muted">Alles lokal im Browser – keine Registrierung, keine echten Märkte.</div>
+  </header>
+  <div class="wrap">
+    <div class="grid">
+      <section class="card">
+        <div class="row" style="justify-content:space-between; align-items:flex-end; gap:16px;">
+          <div>
+            <div class="muted small">Gesamtwert</div>
+            <div id="total" style="font-size:28px; font-weight:700;">—</div>
+            <div class="small muted">Startkapital: <span id="cashStart">10.000,00 €</span> · Cash: <span id="cash">—</span></div>
+          </div>
+          <div class="row">
+            <label class="small muted">Startkapital:&nbsp;</label>
+            <input id="seed" type="number" min="100" step="100" value="10000" />
+            <button id="reset">Neu starten</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:16px; gap:12px;">
+          <select id="ticker">
+            <option value="AAPL">AAPL – Apple</option>
+            <option value="MSFT">MSFT – Microsoft</option>
+            <option value="TSLA">TSLA – Tesla</option>
+            <option value="NVDA">NVDA – NVIDIA</option>
+            <option value="AMZN">AMZN – Amazon</option>
+          </select>
+          <input id="qty" type="number" min="1" step="1" value="1" />
+          <button id="buy">Kaufen</button>
+          <button id="sell">Verkaufen</button>
+          <span class="pill small">Preis: <span id="price">—</span></span>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th class="right">Stück</th>
+              <th class="right">Kurs</th>
+              <th class="right">Wert</th>
+              <th class="right">Δ heute</th>
+              <th class="right">Gesamt P/L</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+
+        <div class="notice" style="margin-top:8px;">Hinweis: Preise sind <b>simuliert</b> aus historischen Tagesdaten (vereinfacht) und ändern sich beim Laden. Für Lernen gedacht – keine Finanzberatung.</div>
+      </section>
+
+      <aside class="card">
+        <h3 style="margin-top:0;">Verlauf</h3>
+        <canvas id="chart" width="800" height="240"></canvas>
+        <div class="small muted">Tageswert der letzten 200 „Börsentage“ (simuliert).</div>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,.08);margin:16px 0;"/>
+        <details>
+          <summary>⚙️ Erweitert</summary>
+          <div class="small muted" style="margin-top:8px;">
+            • Datenbasis: vereinfachte historische Reihen (AAPL, MSFT, TSLA, NVDA, AMZN).<br>
+            • Persistenz: <code>localStorage</code> im Browser.<br>
+            • Keine Server/Keys nötig. Später leicht auf API/Backend erweiterbar.
+          </div>
+        </details>
+      </aside>
+    </div>
+  </div>
+
+<script>
+const HIST = {
+  AAPL: Array.from({length:220}, (_,i)=> 150 + Math.sin(i/9)*4 + i*0.08 + (Math.random()-0.5)*1.6 ),
+  MSFT: Array.from({length:220}, (_,i)=> 320 + Math.sin(i/7)*6 + i*0.11 + (Math.random()-0.5)*2.2 ),
+  TSLA: Array.from({length:220}, (_,i)=> 210 + Math.sin(i/5)*12 + i*0.05 + (Math.random()-0.5)*4 ),
+  NVDA: Array.from({length:220}, (_,i)=> 850 + Math.sin(i/6)*22 + i*0.6 + (Math.random()-0.5)*8 ),
+  AMZN: Array.from({length:220}, (_,i)=> 170 + Math.sin(i/8)*5 + i*0.07 + (Math.random()-0.5)*2 )
+};
+
+const S = {
+  day: 200,
+  cash: 10000,
+  seed: 10000,
+  lots: {},
+  history: []
+};
+
+(function init(){
+  const saved = JSON.parse(localStorage.getItem('kidpf')||'null');
+  if(saved){ Object.assign(S, saved); }
+  document.querySelector('#seed').value = S.seed;
+  updatePriceBadge();
+  tick();
+})();
+
+const € = n => n.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+const rnd = x => Math.round(x*100)/100;
+
+function price(t){ const arr=HIST[t]; return rnd(arr[Math.min(S.day, arr.length-1)]); }
+function pricePrev(t){ const arr=HIST[t]; return rnd(arr[Math.max(0, Math.min(S.day-1, arr.length-1))]); }
+
+function portfolioValue(){
+  let v = S.cash;
+  for(const [t, lot] of Object.entries(S.lots)) v += lot.qty * price(t);
+  return v;
+}
+
+function save(){ localStorage.setItem('kidpf', JSON.stringify(S)); }
+
+function updatePriceBadge(){
+  const t = document.querySelector('#ticker').value;
+  document.querySelector('#price').textContent = €(price(t));
+}
+
+function render(){
+  document.querySelector('#cashStart').textContent = €(S.seed);
+  document.querySelector('#cash').textContent = €(S.cash);
+  document.querySelector('#total').textContent = €(portfolioValue());
+
+  const tbody = document.querySelector('#rows');
+  tbody.innerHTML = '';
+  for(const t of Object.keys(HIST)){
+    const lot = S.lots[t] || {qty:0, cost:0};
+    const p = price(t), pp = pricePrev(t);
+    const value = lot.qty * p;
+    const dayDelta = value - lot.qty * pp;
+    const pl = lot.qty>0 ? (p - lot.cost) * lot.qty : 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><b>${t}</b></td>
+      <td class="right">${lot.qty}</td>
+      <td class="right">${€(p)}</td>
+      <td class="right">${€(value)}</td>
+      <td class="right ${dayDelta>=0? 'value-up':'value-down' }">${dayDelta>=0?'+':''}${€(dayDelta)}</td>
+      <td class="right ${pl>=0? 'value-up':'value-down' }">${pl>=0?'+':''}${€(pl)}</td>
+      <td class="right"><button data-t="${t}" class="small">Alles verkaufen</button></td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function drawChart(){
+  const c = document.querySelector('#chart');
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  const data = S.history.slice(-200);
+  if(data.length<2) return;
+  const min = Math.min(...data), max = Math.max(...data);
+  const pad = (max-min)*0.1 || 10;
+  const h = c.height-20, w=c.width-20;
+  ctx.strokeStyle = '#a5c8ff'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  data.forEach((v,i)=>{
+    const x = 10 + i*(w/(data.length-1));
+    const y = 10 + (h - ( (v-(min-pad)) / ((max+pad)-(min-pad)) )*h);
+    i? ctx.lineTo(x,y): ctx.moveTo(x,y);
+  });
+  ctx.stroke();
+}
+
+function tick(){
+  const total = portfolioValue();
+  S.history.push(total);
+  if(S.history.length>400) S.history.shift();
+  render();
+  drawChart();
+  save();
+}
+
+document.querySelector('#ticker').addEventListener('change', updatePriceBadge);
+
+document.querySelector('#buy').addEventListener('click', ()=>{
+  const t = document.querySelector('#ticker').value;
+  const q = Math.max(1, parseInt(document.querySelector('#qty').value||'1',10));
+  const p = price(t);
+  const cost = q*p;
+  if(cost > S.cash){ alert('Nicht genug Cash.'); return; }
+  const lot = S.lots[t] || {qty:0, cost:p};
+  const newQty = lot.qty + q;
+  const newCost = newQty>0 ? (lot.qty*lot.cost + q*p)/newQty : p;
+  S.lots[t] = { qty:newQty, cost:rnd(newCost) };
+  S.cash = rnd(S.cash - cost);
+  updatePriceBadge();
+  tick();
+});
+
+document.querySelector('#sell').addEventListener('click', ()=>{
+  const t = document.querySelector('#ticker').value;
+  const q = Math.max(1, parseInt(document.querySelector('#qty').value||'1',10));
+  const lot = S.lots[t] || {qty:0, cost:0};
+  if(q>lot.qty){ alert('Nicht so viele Stück im Depot.'); return; }
+  const p = price(t);
+  S.cash = rnd(S.cash + q*p);
+  S.lots[t] = { qty: lot.qty - q, cost: lot.cost };
+  tick();
+});
+
+document.querySelector('#rows').addEventListener('click', (e)=>{
+  if(e.target.tagName==='BUTTON'){
+    const t = e.target.getAttribute('data-t');
+    const lot = S.lots[t];
+    if(lot && lot.qty>0){
+      S.cash = rnd(S.cash + lot.qty*price(t));
+      S.lots[t] = {qty:0, cost:lot.cost};
+      tick();
+    }
+  }
+});
+
+document.querySelector('#reset').addEventListener('click', ()=>{
+  const seed = Math.max(100, parseInt(document.querySelector('#seed').value||'10000',10));
+  S.seed = seed; S.cash = seed; S.lots = {}; S.history=[]; S.day = 200 + Math.floor(Math.random()*10-5);
+  tick();
+});
+
+render(); drawChart();
+</script>
+</body>
+</html>
