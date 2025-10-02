@@ -3,98 +3,198 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kinder-Portfolio – Spielgeld-Demo</title>
+  <title>Amelies Einhorn‑Depot 🦄</title>
   <style>
-    :root { --bg:#0b1220; --panel:#121a2b; --muted:#9fb0d0; --text:#e7eeff; --accent:#7cc0ff; }
-    * { box-sizing: border-box; }
-    body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial; background: linear-gradient(180deg, #0b1220, #0a0f1a); color:var(--text); }
-    header{ padding:24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,.06); }
-    h1{ font-size:20px; margin:0; letter-spacing:.2px; }
-    .wrap{ max-width:1100px; margin:0 auto; padding:24px; }
+    :root{
+      --bg:#fff7ff;
+      --panel:#ffffff;
+      --muted:#6b6b83;
+      --text:#3a2a4a;
+      --accent:#cb8df5;
+      --accent2:#8ad6ff;
+      --good:#1c9a57;
+      --bad:#cc2244;
+      --yellow:#ffd966;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 20% -10%, #ffeaff 0%, rgba(255,255,255,0) 50%),
+                  radial-gradient(900px 700px at 100% 0%, #e4fbff 0%, rgba(255,255,255,0) 62%),
+                  #fff7ff;
+    }
+    header{
+      padding:24px; display:flex; align-items:center; justify-content:space-between;
+    }
+    h1{ margin:0; font-size:22px; letter-spacing:.2px; display:flex; gap:8px; align-items:center; }
+    .unicorn{ font-size:28px; }
+    .wrap{ max-width:1000px; margin:0 auto; padding:0 16px 24px; }
     .grid{ display:grid; grid-template-columns: 1fr; gap:16px; }
-    @media(min-width:900px){ .grid{ grid-template-columns: 1.3fr .7fr; } }
-    .card{ background: var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
-    .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    input, select, button{ background:#0a1326; color:var(--text); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px 12px; font-size:14px; }
-    button{ background:linear-gradient(180deg, #1a2a4a, #0d1a33); cursor:pointer; }
-    button:hover{ filter:brightness(1.1); }
+    @media(min-width:1000px){ .grid{ grid-template-columns: 1.2fr .8fr; } }
+    .card{
+      background:var(--panel);
+      border:1px solid rgba(0,0,0,.05);
+      border-radius:20px;
+      padding:16px;
+      box-shadow: 0 8px 24px rgba(160,120,200,.12);
+    }
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    input, select, button{
+      background:#fff; color:var(--text); border:1px solid rgba(0,0,0,.08);
+      border-radius:14px; padding:10px 12px; font-size:14px;
+    }
+    select{ min-width:260px; }
+    button{
+      background:linear-gradient(180deg, #ffd6ff, #e9d7ff);
+      border:1px solid rgba(0,0,0,.06); cursor:pointer;
+      font-weight:600;
+    }
+    button.buy{ background:linear-gradient(180deg, #ffe5f2, #ffd6ff); }
+    button.sell{ background:linear-gradient(180deg, #e6f7ff, #cfeeff); }
+    button:hover{ filter:brightness(1.03); }
     table{ width:100%; border-collapse:collapse; margin-top:8px; }
-    th, td{ padding:10px; border-bottom:1px solid rgba(255,255,255,.06); text-align:left; font-size:14px; }
-    th{ color:var(--muted); font-weight:600; }
+    th, td{ padding:10px; border-bottom:1px solid rgba(0,0,0,.05); text-align:left; font-size:14px; }
+    th{ color:#6b6b83; font-weight:600; }
     .muted{ color:var(--muted); }
-    .pill{ padding:4px 8px; border-radius:999px; background:#0d1933; font-size:12px; border:1px solid rgba(255,255,255,.1); }
+    .pill{ padding:4px 8px; border-radius:999px; background:#faf5ff; font-size:12px; border:1px solid rgba(0,0,0,.06); }
     .right{ text-align:right; }
-    .value-up{ color:#8be38b; }
-    .value-down{ color:#ff9b9b; }
+    .value-up{ color:var(--good); font-weight:600; }
+    .value-down{ color:var(--bad); font-weight:600; }
     .small{ font-size:12px; }
-    .notice{ font-size:12px; color:var(--muted); line-height:1.4; }
-    canvas{ width:100%; height:220px; background:#0a1326; border:1px solid rgba(255,255,255,.08); border-radius:12px; }
+    .notice{ font-size:12px; color:var(--muted); line-height:1.5; }
+    canvas{ width:100%; height:220px; background:linear-gradient(180deg, #fff, #fff9ff); border:1px solid rgba(0,0,0,.06); border-radius:12px; }
+    .tag{ font-size:11px; padding:3px 7px; border-radius:999px; background:#f1f1ff; border:1px solid rgba(0,0,0,.06); }
+    .sparkle{
+      position: fixed; left:0; top:0; pointer-events:none; font-size:18px; animation: float 1200ms ease-out forwards;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.15));
+    }
+    @keyframes float{
+      0%{ transform: translate(var(--sx), var(--sy)) scale(0.8); opacity:0; }
+      20%{ opacity:1; }
+      100%{ transform: translate(calc(var(--sx) + 0px), calc(var(--sy) - 120px)) scale(1.2); opacity:0; }
+    }
+    .edu{
+      display:grid; gap:10px; grid-template-columns: 1fr;
+    }
+    @media(min-width:700px){ .edu{ grid-template-columns: 1fr 1fr; } }
+    .edu .box{
+      background:#fffaf5;
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:16px; padding:12px;
+    }
+    .edu h4{ margin:0 0 6px; font-size:14px; }
+    .desc{ font-size:12px; color:var(--muted); }
+    .help{ font-size:12px; margin-top:8px; }
+    .gold { background:#fff9e6; border-color:#ffeaa3; }
+    .oil  { background:#f6fbff; border-color:#bfe6ff; }
   </style>
 </head>
 <body>
   <header>
-    <h1>📈 Kinder-Portfolio (Spielgeld)</h1>
-    <div class="row small muted">Alles lokal im Browser – keine Registrierung, keine echten Märkte.</div>
+    <h1><span class="unicorn">🦄</span> Amelies Einhorn‑Depot</h1>
+    <div class="row small muted">Nur Spielgeld. Lerne & entdecke!</div>
   </header>
+
   <div class="wrap">
     <div class="grid">
       <section class="card">
         <div class="row" style="justify-content:space-between; align-items:flex-end; gap:16px;">
           <div>
-            <div class="muted small">Gesamtwert</div>
-            <div id="total" style="font-size:28px; font-weight:700;">—</div>
-            <div class="small muted">Startkapital: <span id="cashStart">10.000,00 €</span> · Cash: <span id="cash">—</span></div>
+            <div class="muted small">Mein Schatz</div>
+            <div id="total" style="font-size:28px; font-weight:800;">—</div>
+            <div class="small muted">Start: <span id="cashStart">10.000,00 €</span> · Taschengeld: <span id="cash">—</span></div>
           </div>
           <div class="row">
-            <label class="small muted">Startkapital:&nbsp;</label>
+            <label class="small muted">Start:&nbsp;</label>
             <input id="seed" type="number" min="100" step="100" value="10000" />
-            <button id="reset">Neu starten</button>
+            <button id="reset" title="Neu starten">Neu starten</button>
           </div>
         </div>
 
         <div class="row" style="margin-top:16px; gap:12px;">
           <select id="ticker">
-            <option value="AAPL">AAPL – Apple</option>
-            <option value="MSFT">MSFT – Microsoft</option>
-            <option value="TSLA">TSLA – Tesla</option>
-            <option value="NVDA">NVDA – NVIDIA</option>
-            <option value="AMZN">AMZN – Amazon</option>
+            <optgroup label="Echte Firmen">
+              <option value="DIS">🎬 DIS – Disney</option>
+              <option value="MAT">🎀 MAT – Mattel (Barbie)</option>
+              <option value="HAS">🧸 HAS – Hasbro</option>
+              <option value="MCD">🍟 MCD – McDonald’s</option>
+              <option value="LEGO">🧩 LEGO – Bausteine</option>
+            </optgroup>
+            <optgroup label="Spaß‑Aktien & Dinge">
+              <option value="UNICORN">🦄 UNICORN – Magie AG</option>
+              <option value="PRETZEL">🥨 PRETZEL – Bretzelbäckerei</option>
+              <option value="TOYS">🎲 TOYS – Spielzeugwelt</option>
+              <option value="GOLD">🪙 GOLD – Gold‑Schatz</option>
+              <option value="OIL">🛢️ OIL – Energie‑Öl</option>
+            </optgroup>
           </select>
           <input id="qty" type="number" min="1" step="1" value="1" />
-          <button id="buy">Kaufen</button>
-          <button id="sell">Verkaufen</button>
+          <button id="buy" class="buy">💖 Kaufen</button>
+          <button id="sell" class="sell">💔 Verkaufen</button>
           <span class="pill small">Preis: <span id="price">—</span></span>
+          <span class="tag" id="shortdesc">Wähle etwas aus und entdecke!</span>
         </div>
 
         <table>
           <thead>
             <tr>
-              <th>Ticker</th>
+              <th>Aktie/Ding</th>
               <th class="right">Stück</th>
-              <th class="right">Kurs</th>
+              <th class="right">Preis</th>
               <th class="right">Wert</th>
               <th class="right">Δ heute</th>
-              <th class="right">Gesamt P/L</th>
+              <th class="right">Gewinn</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
         </table>
 
-        <div class="notice" style="margin-top:8px;">Hinweis: Preise sind <b>simuliert</b> aus historischen Tagesdaten (vereinfacht) und ändern sich beim Laden. Für Lernen gedacht – keine Finanzberatung.</div>
+        <div class="notice" style="margin-top:8px;">
+          Hinweis: Preise sind <b>simuliert</b> (vereinfachte Kurven). Nur zum Üben und Spielen – keine echten Käufe.
+        </div>
       </section>
 
       <aside class="card">
-        <h3 style="margin-top:0;">Verlauf</h3>
+        <h3 style="margin-top:0;">Mein Schatz im Verlauf</h3>
         <canvas id="chart" width="800" height="240"></canvas>
-        <div class="small muted">Tageswert der letzten 200 „Börsentage“ (simuliert).</div>
-        <hr style="border:none;border-top:1px solid rgba(255,255,255,.08);margin:16px 0;"/>
-        <details>
-          <summary>⚙️ Erweitert</summary>
+        <div class="small muted">Letzte 200 „Tage“ (simuliert).</div>
+        <hr style="border:none;border-top:1px solid rgba(0,0,0,.08);margin:16px 0;"/>
+
+        <div class="edu">
+          <div class="box">
+            <h4>Was ist eine Aktie?</h4>
+            <div class="help">Eine Aktie ist ein <b>kleines Stück von einer Firma</b>. Wenn die Firma gut arbeitet, kann dein Stück <b>mehr wert</b> werden. Manchmal wird es auch weniger – das ist normal.</div>
+          </div>
+          <div class="box">
+            <h4>Gewinn & Verlust</h4>
+            <div class="help">Kaufst du etwas für 10 € und es wird 12 €, ist das <b>Gewinn</b> (2 €). Wird es 8 €, ist das <b>Verlust</b> (−2 €). Du siehst es in der Tabelle.</div>
+          </div>
+          <div class="box">
+            <h4>Streuen (wie Süßigkeiten)</h4>
+            <div class="help">Nicht nur eine Sache kaufen! <b>Viele kleine</b> ist besser. Wenn eins fällt, halten die anderen dagegen.</div>
+          </div>
+          <div class="box">
+            <h4>Geduld</h4>
+            <div class="help">Werte hüpfen jeden Tag. <b>Langsam und ruhig</b> ist meist klüger als schnell.</div>
+          </div>
+          <div class="box gold">
+            <h4>🪙 Gold</h4>
+            <div class="help">Gold ist wie ein <b>Funken‑Schatz</b>. Es gehört keiner Firma. Viele Menschen mögen es, wenn sie <b>Sicherheit</b> wollen.</div>
+          </div>
+          <div class="box oil">
+            <h4>🛢️ Öl (Energie)</h4>
+            <div class="help">Öl hilft Autos, Flugzeugen und Fabriken. <b>Preis kann stark schwanken</b>, wenn viel oder wenig gebraucht wird.</div>
+          </div>
+        </div>
+
+        <details style="margin-top:10px;">
+          <summary>⚙️ Eltern‑Infos</summary>
           <div class="small muted" style="margin-top:8px;">
-            • Datenbasis: vereinfachte historische Reihen (AAPL, MSFT, TSLA, NVDA, AMZN).<br>
-            • Persistenz: <code>localStorage</code> im Browser.<br>
-            • Keine Server/Keys nötig. Später leicht auf API/Backend erweiterbar.
+            • Keine echten Kurse; alles localStorage unter <code>ameliepf</code>.<br>
+            • LEGO ist ein fiktiver Ticker (nicht börsennotiert).<br>
+            • Gold/Öl hier nur als kindgerechte Platzhalter (keine Anlageempfehlung).
           </div>
         </details>
       </aside>
@@ -102,16 +202,38 @@
   </div>
 
 <script>
-// --- Daten ---
-const HIST = {
-  AAPL: Array.from({length:220}, (_,i)=> 150 + Math.sin(i/9)*4 + i*0.08 + (Math.random()-0.5)*1.6 ),
-  MSFT: Array.from({length:220}, (_,i)=> 320 + Math.sin(i/7)*6 + i*0.11 + (Math.random()-0.5)*2.2 ),
-  TSLA: Array.from({length:220}, (_,i)=> 210 + Math.sin(i/5)*12 + i*0.05 + (Math.random()-0.5)*4 ),
-  NVDA: Array.from({length:220}, (_,i)=> 850 + Math.sin(i/6)*22 + i*0.6 + (Math.random()-0.5)*8 ),
-  AMZN: Array.from({length:220}, (_,i)=> 170 + Math.sin(i/8)*5 + i*0.07 + (Math.random()-0.5)*2 )
+// ---- Kurze Beschreibungen je Auswahl ----
+const DESCRIPTIONS = {
+  DIS: "Disney macht Filme, Serien und Parks – wie Eiskönigin oder Mickey.",
+  MAT: "Mattel macht Barbie, UNO und Hot Wheels – viele Spielsachen.",
+  HAS: "Hasbro macht Spiele wie Monopoly und My Little Pony‑Spielzeug.",
+  MCD: "McDonald’s verkauft Essen – das Happy Meal kennst du!",
+  LEGO:"LEGO baut bunte Stein‑Welten. Hier als fiktive Aktie.",
+  UNICORN:"Einhorn‑Magie! Eine Fantasie‑Aktie nur zum Spaß.",
+  PRETZEL:"Lecker! Eine Bretzel‑Firma als Spaß‑Aktie.",
+  TOYS:"Alles rund um Spielzeug in einer Fantasie‑Aktie.",
+  GOLD:"Gold ist ein Schatz, kein Unternehmen. Viele finden es sicher.",
+  OIL:"Öl ist Energie für viele Dinge. Preise können stark schwanken."
 };
 
-// --- State ---
+// ---- Sanfte Simulation ----
+function makeSeries(base, amp, trend){
+  return Array.from({length:220}, (_,i)=> base + Math.sin(i/7)*amp + i*trend + (Math.random()-0.5)*(amp*0.25));
+}
+const HIST = {
+  DIS:     makeSeries(95,  3.5, 0.05),
+  MAT:     makeSeries(22,  2.0, 0.03),
+  HAS:     makeSeries(50,  3.0, 0.02),
+  MCD:     makeSeries(260, 2.0, 0.04),
+  LEGO:    makeSeries(80,  2.5, 0.03), // fiktiv
+  UNICORN: makeSeries(40,  6.0, 0.06),
+  PRETZEL: makeSeries(15,  1.5, 0.02),
+  TOYS:    makeSeries(35,  2.8, 0.03),
+  GOLD:    makeSeries(60,  1.2, 0.02), // ruhiger, defensiv
+  OIL:     makeSeries(70,  4.0, 0.00)  // volatiler, seitwärts
+};
+
+// ---- State ----
 const S = {
   day: 200,
   cash: 10000,
@@ -120,20 +242,26 @@ const S = {
   history: []
 };
 
-// --- Utils (Euro-Format) ---
+// ---- Helpers ----
 function fmt(n){ return Number(n).toLocaleString('de-DE', {style:'currency', currency:'EUR'}); }
 const rnd = x => Math.round(x*100)/100;
-
-// --- Preise ---
 function price(t){ const arr=HIST[t]; return rnd(arr[Math.min(S.day, arr.length-1)]); }
 function pricePrev(t){ const arr=HIST[t]; return rnd(arr[Math.max(0, Math.min(S.day-1, arr.length-1))]); }
 
-// --- Init (mit robustem localStorage) ---
+function sparkle(x,y){
+  const el = document.createElement('div');
+  el.className = 'sparkle';
+  const emojis = ['✨','🌟','💖','🦄','⭐'];
+  el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+  el.style.setProperty('--sx', x+'px');
+  el.style.setProperty('--sy', y+'px');
+  document.body.appendChild(el);
+  setTimeout(()=> el.remove(), 1300);
+}
+
+// ---- Load ----
 (function init(){
-  try {
-    const saved = JSON.parse(localStorage.getItem('kidpf')||'null');
-    if(saved){ Object.assign(S, saved); }
-  } catch (e) { /* ignore storage errors */ }
+  try { Object.assign(S, JSON.parse(localStorage.getItem('ameliepf')||'null')||{}); } catch(e){}
   document.querySelector('#seed').value = S.seed;
   updatePriceBadge();
   tick();
@@ -144,12 +272,12 @@ function portfolioValue(){
   for(const [t, lot] of Object.entries(S.lots)) v += lot.qty * price(t);
   return v;
 }
-
-function save(){ try{ localStorage.setItem('kidpf', JSON.stringify(S)); } catch(e){} }
+function save(){ try{ localStorage.setItem('ameliepf', JSON.stringify(S)); } catch(e){} }
 
 function updatePriceBadge(){
   const t = document.querySelector('#ticker').value;
   document.querySelector('#price').textContent = fmt(price(t));
+  document.querySelector('#shortdesc').textContent = DESCRIPTIONS[t] || "Entdecke mehr!";
 }
 
 function render(){
@@ -188,7 +316,7 @@ function drawChart(){
   const min = Math.min(...data), max = Math.max(...data);
   const pad = (max-min)*0.1 || 10;
   const h = c.height-20, w=c.width-20;
-  ctx.strokeStyle = '#a5c8ff'; ctx.lineWidth = 2;
+  ctx.strokeStyle = '#b86cff'; ctx.lineWidth = 2;
   ctx.beginPath();
   data.forEach((v,i)=>{
     const x = 10 + i*(w/(data.length-1));
@@ -207,15 +335,15 @@ function tick(){
   save();
 }
 
-// --- Events ---
+// ---- Events ----
 document.querySelector('#ticker').addEventListener('change', updatePriceBadge);
 
-document.querySelector('#buy').addEventListener('click', ()=>{
+document.querySelector('#buy').addEventListener('click', (e)=>{
   const t = document.querySelector('#ticker').value;
   const q = Math.max(1, parseInt(document.querySelector('#qty').value||'1',10));
   const p = price(t);
   const cost = q*p;
-  if(cost > S.cash){ alert('Nicht genug Cash.'); return; }
+  if(cost > S.cash){ alert('Nicht genug Taschengeld.'); return; }
   const lot = S.lots[t] || {qty:0, cost:p};
   const newQty = lot.qty + q;
   const newCost = newQty>0 ? (lot.qty*lot.cost + q*p)/newQty : p;
@@ -223,6 +351,8 @@ document.querySelector('#buy').addEventListener('click', ()=>{
   S.cash = rnd(S.cash - cost);
   updatePriceBadge();
   tick();
+  const r = e.currentTarget.getBoundingClientRect();
+  sparkle(r.left + r.width/2, r.top);
 });
 
 document.querySelector('#sell').addEventListener('click', ()=>{
@@ -254,7 +384,8 @@ document.querySelector('#reset').addEventListener('click', ()=>{
   tick();
 });
 
-render(); drawChart();
+// initialize shortdesc
+updatePriceBadge();
 </script>
 </body>
 </html>
