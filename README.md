@@ -1,17 +1,22 @@
-# Kinder-Portfolio (Spielgeld) – Demo
+# Amelies Einhorn-Glitzer 🦄✨
 
-Einfaches, rein clientseitiges Aktien-Spiel-Portfolio für Lernzwecke. Keine echten Kurse/Trades.
+Ein kleines Jump’n’Run-Spiel für meine Tochter Amelie, gebaut mit [Phaser.js](https://phaser.io/)  
+und auf [Vercel](https://vercel.com/) deployt.
 
-## Deploy mit Vercel
-1. Neues Projekt in Vercel anlegen (Import Git Repository).
-2. Dieses Repo pushen (nur `index.html` reicht).
-3. Framework Preset: **Other** (Static).
-4. Build Command: **– leer lassen –**
-5. Output Directory: **/** (Root)
-6. Deploy.
+## Steuerung
+- Tippen oder Klicken = Springen (oder den großen Button "SPRINGEN" drücken)
+- Doppelsprung möglich
+- 🦄 = +1 Punkt
+- 🦄✨ = +5 Punkte
 
-Oder lokal:
+## Deployment
+Einfach die Dateien (`index.html`) auf Vercel hochladen oder via CLI:
+
 ```bash
 npm i -g vercel
-vercel deploy --prod
+vercel
 ```
+
+## Credits
+💖 Idee, Umsetzung: Papa  
+💖 Junior Entwickler: Amelie ✨
