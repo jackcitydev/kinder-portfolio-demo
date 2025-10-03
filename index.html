@@ -1,202 +1,346 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>Amelies Einhorn-Glitzer</title>
-  <style>
-    html, body { height: 100%; margin: 0; }
-    body {
-      background: linear-gradient(180deg, #ffd1e8 0%, #ffc1df 25%, #ffb3d8 50%, #ff9fce 75%, #ff8ac5 100%);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      touch-action: none;
-    }
-    #game { max-width: 100vw; max-height: 100vh; }
-    .signature { position: fixed; left: 50%; transform: translateX(-50%); bottom: 8px; font-size: 14px; color: #7a0040; text-shadow: 0 1px 0 rgba(255,255,255,.5); font-style: italic; }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Amelies Einhorn-Fang ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ffdde1 100%);
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            width: 100vw;
+            height: 100vh;
+        }
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff6ec4 0%, #ff9a9e 50%, #ffc3a0 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: sparkle 2s infinite;
+        }
+        @keyframes sparkle {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+        .title {
+            font-size: clamp(2em, 8vw, 4em);
+            color: white;
+            text-shadow: 4px 4px 8px rgba(255, 105, 180, 0.8),
+                         0 0 20px rgba(255, 182, 193, 0.6);
+            margin-bottom: 30px;
+            animation: bounce 1s infinite;
+            text-align: center;
+            padding: 0 20px;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .instructions {
+            font-size: clamp(1.2em, 4vw, 1.8em);
+            color: white;
+            text-align: center;
+            max-width: 90%;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .start-button {
+            font-size: clamp(1.5em, 5vw, 2.5em);
+            padding: 20px 60px;
+            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 20, 147, 0.5);
+            transition: all 0.3s;
+            font-family: 'Comic Sans MS', cursive;
+            font-weight: bold;
+        }
+        .start-button:active {
+            transform: scale(0.95);
+        }
+        #game-canvas {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: clamp(1.5em, 5vw, 2em);
+            text-shadow: 3px 3px 6px rgba(255, 20, 147, 0.8);
+            z-index: 100;
+            display: none;
+            font-weight: bold;
+        }
+        .highscore-display {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            color: white;
+            font-size: clamp(1em, 3vw, 1.5em);
+            text-shadow: 2px 2px 4px rgba(255, 20, 147, 0.8);
+            z-index: 100;
+            display: none;
+        }
+        .signature {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: clamp(0.8em, 2.5vw, 1em);
+            z-index: 200;
+            text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.5);
+        }
+    </style>
 </head>
 <body>
-  <div id="game"></div>
-  <div class="signature">Junior Entwickler Amelie ✨</div>
-  <script>
-  (() => {
-    const GAME_W = 800;
-    const GAME_H = 450;
+    <div id="start-screen">
+        <div class="title">✨ Amelies Einhorn-Fang ✨</div>
+        <div class="instructions">
+            Tippe auf das Display,<br>um das Herz zu bewegen! 💖<br><br>
+            Fange alle herabfallenden Einhörner! 🦄<br>
+            Super-Einhörner geben 5 Punkte! ✨
+        </div>
+        <button class="start-button" id="start-btn">START ✨</button>
+    </div>
+    
+    <canvas id="game-canvas"></canvas>
+    <div class="score-display" id="score">Punkte: 0</div>
+    <div class="highscore-display" id="highscore">Highscore: 0</div>
+    <div class="signature">Junior Entwickler Amelie ✨</div>
 
-    const config = {
-      type: Phaser.AUTO,
-      parent: 'game',
-      width: GAME_W,
-      height: GAME_H,
-      backgroundColor: 'rgba(0,0,0,0)',
-      physics: {
-        default: 'arcade',
-        arcade: { gravity: { y: 1400 }, debug: false }
-      },
-      scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-    };
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const scoreDisplay = document.getElementById('score');
+        const highscoreDisplay = document.getElementById('highscore');
 
-    const game = new Phaser.Game(config);
+        // Canvas Größe
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-    class StartScene extends Phaser.Scene {
-      constructor() { super('start'); }
-      create() {
-        this.add.text(GAME_W/2, GAME_H/2 - 70, 'Amelies Einhorn-Glitzer', {
-          fontSize: '32px', color: '#7a0040', stroke: '#fff', strokeThickness: 4
-        }).setOrigin(0.5);
+        let score = 0;
+        let highScore = localStorage.getItem('amelie-highscore') || 0;
+        let unicornCount = 0;
+        let gameRunning = false;
 
-        this.add.text(GAME_W/2, GAME_H/2 - 10, 'Tippe irgendwo oder den Knopf, um zu springen!\nFange die 🦄 für Punkte!', {
-          fontSize: '20px', color: '#7a0040', align: 'center', stroke: '#fff', strokeThickness: 3
-        }).setOrigin(0.5);
+        // Player (Herz)
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 100,
+            size: 60,
+            emoji: '💖',
+            targetX: canvas.width / 2
+        };
 
-        const startBtn = this.add.text(GAME_W/2, GAME_H/2 + 100, '▶️ Start', {
-          fontSize: '28px', color: '#fff', backgroundColor: '#ff2a7f', padding: {x:20,y:10}
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        // Unicorns Array
+        let unicorns = [];
 
-        startBtn.on('pointerdown', () => {
-          this.scene.start('main');
+        // Partikel für Effekte
+        let particles = [];
+
+        // Start Game
+        startBtn.addEventListener('click', startGame);
+        startBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startGame();
         });
-      }
-    }
 
-    class MainScene extends Phaser.Scene {
-      constructor() { super('main'); }
+        function startGame() {
+            startScreen.style.display = 'none';
+            canvas.style.display = 'block';
+            scoreDisplay.style.display = 'block';
+            highscoreDisplay.style.display = 'block';
+            highscoreDisplay.textContent = `Highscore: ${highScore}`;
+            gameRunning = true;
+            score = 0;
+            unicorns = [];
+            particles = [];
+            unicornCount = 0;
+            gameLoop();
+            spawnUnicorns();
+        }
 
-      create() {
-        this.score = 0;
-        this.best = +(localStorage.getItem('amelie_best') || 0);
-        this.level = 1;
-        this.collected = 0;
+        // Touch/Click Input
+        canvas.addEventListener('touchmove', handleInput);
+        canvas.addEventListener('touchstart', handleInput);
+        canvas.addEventListener('mousemove', handleInput);
+        canvas.addEventListener('click', handleInput);
 
-        const groundHeight = 60;
-        this.ground = this.add.rectangle(GAME_W/2, GAME_H - groundHeight/2, GAME_W, groundHeight, 0xffffff, 0.25);
-        this.physics.add.existing(this.ground, true);
+        function handleInput(e) {
+            e.preventDefault();
+            if (!gameRunning) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.touches ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
+            player.targetX = x;
+        }
 
-        this.playerVisual = this.add.text(140, GAME_H - groundHeight - 40, '💖', { fontSize: '48px' }).setOrigin(0.5);
-        this.player = this.add.circle(this.playerVisual.x, this.playerVisual.y, 22, 0xff2a7f, 0.2);
-        this.physics.add.existing(this.player);
-        this.player.body.setCollideWorldBounds(true);
-        this.player.body.setBounce(0);
-        this.jumpCount = 0;
+        // Spawn Unicorns
+        function spawnUnicorns() {
+            if (!gameRunning) return;
+            
+            unicornCount++;
+            const isSuper = unicornCount % 10 === 0;
+            
+            const unicorn = {
+                x: Math.random() * (canvas.width - 60) + 30,
+                y: -60,
+                speed: 2 + Math.random() * 2,
+                emoji: isSuper ? '🦄✨' : '🦄',
+                isSuper: isSuper,
+                size: isSuper ? 70 : 50
+            };
+            
+            unicorns.push(unicorn);
+            
+            // Nächstes Einhorn spawnen
+            setTimeout(spawnUnicorns, 1000 + Math.random() * 1000);
+        }
 
-        this.physics.add.collider(this.player, this.ground, () => { this.jumpCount = 0; });
-
-        // Tutorial-Hinweis über Amelie
-        this.hint = this.add.text(this.playerVisual.x, this.playerVisual.y - 60, 'Das ist Amelie 💖\nTippe oder drücke unten „SPRINGEN“!', {
-          fontSize: '18px', color: '#7a0040', stroke: '#fff', strokeThickness: 3, align: 'center'
-        }).setOrigin(0.5);
-
-        const doJump = () => {
-          if (this.player.body.blocked.down || this.jumpCount < 2) {
-            this.player.body.setVelocityY(-560);
-            this.jumpCount++;
-            this.popParticles(this.player.x, this.player.y+10, 8);
-            if (this.hint && this.hint.active) {
-              this.tweens.add({ targets: this.hint, alpha: 0, duration: 400, onComplete: () => this.hint.destroy() });
+        // Game Loop
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Clear
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Update Player Position (smooth)
+            const dx = player.targetX - player.x;
+            player.x += dx * 0.15;
+            
+            // Draw Player
+            ctx.font = `${player.size}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(player.emoji, player.x, player.y);
+            
+            // Update and Draw Unicorns
+            for (let i = unicorns.length - 1; i >= 0; i--) {
+                const u = unicorns[i];
+                u.y += u.speed;
+                
+                // Draw Unicorn
+                ctx.font = `${u.size}px Arial`;
+                ctx.fillText(u.emoji, u.x, u.y);
+                
+                // Collision Detection
+                const dist = Math.sqrt(
+                    Math.pow(player.x - u.x, 2) + 
+                    Math.pow(player.y - u.y, 2)
+                );
+                
+                if (dist < (player.size + u.size) / 2) {
+                    // Collected!
+                    const points = u.isSuper ? 5 : 1;
+                    score += points;
+                    scoreDisplay.textContent = `Punkte: ${score}`;
+                    
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('amelie-highscore', highScore);
+                        highscoreDisplay.textContent = `Highscore: ${highScore}`;
+                    }
+                    
+                    // Create particles
+                    createParticles(u.x, u.y, points);
+                    
+                    unicorns.splice(i, 1);
+                    continue;
+                }
+                
+                // Remove if off screen
+                if (u.y > canvas.height + 100) {
+                    unicorns.splice(i, 1);
+                }
             }
-          }
-        };
-        this.input.on('pointerdown', doJump);
-        this.input.keyboard?.on('keydown-SPACE', doJump);
-
-        // GROßER SPRINGEN-KNOPF
-        const btn = this.add.rectangle(GAME_W - 120, GAME_H - 50, 200, 60, 0xff2a7f, 0.95).setInteractive({ useHandCursor: true });
-        const btnText = this.add.text(btn.x, btn.y, 'SPRINGEN', { fontSize: '20px', color: '#fff', fontStyle: '700' }).setOrigin(0.5);
-        btn.on('pointerdown', () => { btn.setScale(0.96); doJump(); });
-        btn.on('pointerup',   () => { btn.setScale(1); });
-        btn.on('pointerout',  () => { btn.setScale(1); });
-
-        // Gruppe für Einhörner
-        this.unicornBodies = this.physics.add.group();
-
-        this.physics.add.overlap(this.player, this.unicornBodies, (player, uniBody) => {
-          if (!uniBody.active) return;
-          this.collectUnicorn(uniBody);
-        });
-
-        // Glitzer-Partikel
-        this.particles = this.add.particles(0,0, {
-          emitting: false,
-          lifespan: 600,
-          speed: 160,
-          gravityY: 800,
-          scale: { start: 1, end: 0 },
-          tint: [0xff7ab5, 0xffc1df, 0xffffff]
-        });
-
-        this.scoreText = this.add.text(16, 12, 'Punkte: 0', { fontSize: '22px', color: '#7a0040', stroke: '#fff', strokeThickness: 4 });
-        this.bestText  = this.add.text(GAME_W-16, 12, 'Best: '+this.best, { fontSize: '22px', color: '#7a0040', stroke: '#fff', strokeThickness: 4 }).setOrigin(1,0);
-
-        // Häufigere Spawns + klare Höhe
-        this.unicornTimer = this.time.addEvent({ delay: 900, loop: true, callback: () => this.spawnUnicorn(false) });
-
-        this.time.addEvent({ delay: 9000, loop: true, callback: () => { this.level++; } });
-
-        // Startanimation
-        this.time.delayedCall(600, () => doJump());
-      }
-
-      popParticles(x, y, count=8) {
-        this.particles.emitParticleAt(x, y, count);
-      }
-
-      spawnUnicorn(isSuper) {
-        const minY = 120, maxY = 280;
-        const y = Phaser.Math.Between(minY, maxY);
-        const speed = -(200 + this.level * 40);
-
-        const bodyRect = this.add.rectangle(GAME_W + 40, y, isSuper ? 64 : 44, isSuper ? 64 : 44, 0x000000, 0);
-        this.physics.add.existing(bodyRect);
-        bodyRect.body.setAllowGravity(false);
-        bodyRect.body.setVelocityX(speed);
-
-        const emoji = isSuper ? '🦄✨' : '🦄';
-        const txt = this.add.text(bodyRect.x, y, emoji, { fontSize: isSuper ? '56px' : '40px' }).setOrigin(0.5);
-        bodyRect.visual = txt;
-        this.unicornBodies.add(bodyRect);
-
-        bodyRect.update = () => {
-          txt.x = bodyRect.x; txt.y = bodyRect.y;
-          if (bodyRect.x < -60) { txt.destroy(); bodyRect.destroy(); }
-        };
-
-        if (!isSuper) {
-          this.collected++;
-          if (this.collected % 10 === 0) {
-            this.time.delayedCall(400, () => this.spawnUnicorn(true));
-          }
+            
+            // Update and Draw Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                p.alpha = p.life / 60;
+                
+                ctx.globalAlpha = p.alpha;
+                ctx.font = `${p.size}px Arial`;
+                ctx.fillText(p.emoji, p.x, p.y);
+                ctx.globalAlpha = 1;
+                
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            requestAnimationFrame(gameLoop);
         }
-      }
 
-      collectUnicorn(uniBody) {
-        if (!uniBody.active) return;
-        const isSuper = (uniBody.visual?.text || '').includes('✨');
-        const pts = isSuper ? 5 : 1;
-        this.score += pts;
-        this.scoreText.setText('Punkte: ' + this.score);
-        if (this.score > this.best) {
-          this.best = this.score; this.bestText.setText('Best: ' + this.best);
-          localStorage.setItem('amelie_best', this.best);
+        function createParticles(x, y, points) {
+            // Point text
+            particles.push({
+                x: x,
+                y: y,
+                vx: 0,
+                vy: -3,
+                emoji: `+${points}`,
+                size: 40,
+                life: 60,
+                alpha: 1
+            });
+            
+            // Sparkles
+            const sparkles = ['✨', '⭐', '💫', '🌟', '💖'];
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 * i) / 8;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * 3,
+                    vy: Math.sin(angle) * 3,
+                    emoji: sparkles[i % sparkles.length],
+                    size: 25,
+                    life: 40,
+                    alpha: 1
+                });
+            }
         }
-        this.popParticles(uniBody.x, uniBody.y, isSuper ? 24 : 12);
-        const pop = this.add.text(uniBody.x, uniBody.y - 24, `+${pts}`, { fontSize: '20px', color: '#7a0040', stroke: '#fff', strokeThickness: 4 }).setOrigin(0.5);
-        this.tweens.add({ targets: pop, y: pop.y - 30, alpha: 0, duration: 500, onComplete: () => pop.destroy() });
 
-        uniBody.visual?.destroy();
-        uniBody.destroy();
-      }
-
-      update() {
-        this.playerVisual.x = this.player.x; this.playerVisual.y = this.player.y - 6;
-        if (this.player.y > GAME_H - 100) this.player.y = GAME_H - 100;
-        this.unicornBodies.children.iterate(child => { if (child && child.update) child.update(); });
-      }
-    }
-
-    game.scene.add('start', StartScene, true);
-    game.scene.add('main', MainScene, false);
-  })();
-  </script>
+        // Handle resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            player.y = canvas.height - 100;
+        });
+    </script>
 </body>
 </html>
