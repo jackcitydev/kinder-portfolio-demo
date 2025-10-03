@@ -1,391 +1,202 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Amelies Einhorn‑Depot 🦄</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Amelies Einhorn-Glitzer</title>
   <style>
-    :root{
-      --bg:#fff7ff;
-      --panel:#ffffff;
-      --muted:#6b6b83;
-      --text:#3a2a4a;
-      --accent:#cb8df5;
-      --accent2:#8ad6ff;
-      --good:#1c9a57;
-      --bad:#cc2244;
-      --yellow:#ffd966;
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: linear-gradient(180deg, #ffd1e8 0%, #ffc1df 25%, #ffb3d8 50%, #ff9fce 75%, #ff8ac5 100%);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      touch-action: none;
     }
-    *{ box-sizing:border-box; }
-    body{
-      margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      color:var(--text);
-      background: radial-gradient(1200px 800px at 20% -10%, #ffeaff 0%, rgba(255,255,255,0) 50%),
-                  radial-gradient(900px 700px at 100% 0%, #e4fbff 0%, rgba(255,255,255,0) 62%),
-                  #fff7ff;
-    }
-    header{
-      padding:24px; display:flex; align-items:center; justify-content:space-between;
-    }
-    h1{ margin:0; font-size:22px; letter-spacing:.2px; display:flex; gap:8px; align-items:center; }
-    .unicorn{ font-size:28px; }
-    .wrap{ max-width:1000px; margin:0 auto; padding:0 16px 24px; }
-    .grid{ display:grid; grid-template-columns: 1fr; gap:16px; }
-    @media(min-width:1000px){ .grid{ grid-template-columns: 1.2fr .8fr; } }
-    .card{
-      background:var(--panel);
-      border:1px solid rgba(0,0,0,.05);
-      border-radius:20px;
-      padding:16px;
-      box-shadow: 0 8px 24px rgba(160,120,200,.12);
-    }
-    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    input, select, button{
-      background:#fff; color:var(--text); border:1px solid rgba(0,0,0,.08);
-      border-radius:14px; padding:10px 12px; font-size:14px;
-    }
-    select{ min-width:260px; }
-    button{
-      background:linear-gradient(180deg, #ffd6ff, #e9d7ff);
-      border:1px solid rgba(0,0,0,.06); cursor:pointer;
-      font-weight:600;
-    }
-    button.buy{ background:linear-gradient(180deg, #ffe5f2, #ffd6ff); }
-    button.sell{ background:linear-gradient(180deg, #e6f7ff, #cfeeff); }
-    button:hover{ filter:brightness(1.03); }
-    table{ width:100%; border-collapse:collapse; margin-top:8px; }
-    th, td{ padding:10px; border-bottom:1px solid rgba(0,0,0,.05); text-align:left; font-size:14px; }
-    th{ color:#6b6b83; font-weight:600; }
-    .muted{ color:var(--muted); }
-    .pill{ padding:4px 8px; border-radius:999px; background:#faf5ff; font-size:12px; border:1px solid rgba(0,0,0,.06); }
-    .right{ text-align:right; }
-    .value-up{ color:var(--good); font-weight:600; }
-    .value-down{ color:var(--bad); font-weight:600; }
-    .small{ font-size:12px; }
-    .notice{ font-size:12px; color:var(--muted); line-height:1.5; }
-    canvas{ width:100%; height:220px; background:linear-gradient(180deg, #fff, #fff9ff); border:1px solid rgba(0,0,0,.06); border-radius:12px; }
-    .tag{ font-size:11px; padding:3px 7px; border-radius:999px; background:#f1f1ff; border:1px solid rgba(0,0,0,.06); }
-    .sparkle{
-      position: fixed; left:0; top:0; pointer-events:none; font-size:18px; animation: float 1200ms ease-out forwards;
-      filter: drop-shadow(0 2px 2px rgba(0,0,0,.15));
-    }
-    @keyframes float{
-      0%{ transform: translate(var(--sx), var(--sy)) scale(0.8); opacity:0; }
-      20%{ opacity:1; }
-      100%{ transform: translate(calc(var(--sx) + 0px), calc(var(--sy) - 120px)) scale(1.2); opacity:0; }
-    }
-    .edu{
-      display:grid; gap:10px; grid-template-columns: 1fr;
-    }
-    @media(min-width:700px){ .edu{ grid-template-columns: 1fr 1fr; } }
-    .edu .box{
-      background:#fffaf5;
-      border:1px solid rgba(0,0,0,.06);
-      border-radius:16px; padding:12px;
-    }
-    .edu h4{ margin:0 0 6px; font-size:14px; }
-    .desc{ font-size:12px; color:var(--muted); }
-    .help{ font-size:12px; margin-top:8px; }
-    .gold { background:#fff9e6; border-color:#ffeaa3; }
-    .oil  { background:#f6fbff; border-color:#bfe6ff; }
+    #game { max-width: 100vw; max-height: 100vh; }
+    .signature { position: fixed; left: 50%; transform: translateX(-50%); bottom: 8px; font-size: 14px; color: #7a0040; text-shadow: 0 1px 0 rgba(255,255,255,.5); font-style: italic; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1><span class="unicorn">🦄</span> Amelies Einhorn‑Depot</h1>
-    <div class="row small muted">Nur Spielgeld. Lerne & entdecke!</div>
-  </header>
+  <div id="game"></div>
+  <div class="signature">Junior Entwickler Amelie ✨</div>
+  <script>
+  (() => {
+    const GAME_W = 800;
+    const GAME_H = 450;
 
-  <div class="wrap">
-    <div class="grid">
-      <section class="card">
-        <div class="row" style="justify-content:space-between; align-items:flex-end; gap:16px;">
-          <div>
-            <div class="muted small">Mein Schatz</div>
-            <div id="total" style="font-size:28px; font-weight:800;">—</div>
-            <div class="small muted">Start: <span id="cashStart">10.000,00 €</span> · Taschengeld: <span id="cash">—</span></div>
-          </div>
-          <div class="row">
-            <label class="small muted">Start:&nbsp;</label>
-            <input id="seed" type="number" min="100" step="100" value="10000" />
-            <button id="reset" title="Neu starten">Neu starten</button>
-          </div>
-        </div>
+    const config = {
+      type: Phaser.AUTO,
+      parent: 'game',
+      width: GAME_W,
+      height: GAME_H,
+      backgroundColor: 'rgba(0,0,0,0)',
+      physics: {
+        default: 'arcade',
+        arcade: { gravity: { y: 1400 }, debug: false }
+      },
+      scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+    };
 
-        <div class="row" style="margin-top:16px; gap:12px;">
-          <select id="ticker">
-            <optgroup label="Echte Firmen">
-              <option value="DIS">🎬 DIS – Disney</option>
-              <option value="MAT">🎀 MAT – Mattel (Barbie)</option>
-              <option value="HAS">🧸 HAS – Hasbro</option>
-              <option value="MCD">🍟 MCD – McDonald’s</option>
-              <option value="LEGO">🧩 LEGO – Bausteine</option>
-            </optgroup>
-            <optgroup label="Spaß‑Aktien & Dinge">
-              <option value="UNICORN">🦄 UNICORN – Magie AG</option>
-              <option value="PRETZEL">🥨 PRETZEL – Bretzelbäckerei</option>
-              <option value="TOYS">🎲 TOYS – Spielzeugwelt</option>
-              <option value="GOLD">🪙 GOLD – Gold‑Schatz</option>
-              <option value="OIL">🛢️ OIL – Energie‑Öl</option>
-            </optgroup>
-          </select>
-          <input id="qty" type="number" min="1" step="1" value="1" />
-          <button id="buy" class="buy">💖 Kaufen</button>
-          <button id="sell" class="sell">💔 Verkaufen</button>
-          <span class="pill small">Preis: <span id="price">—</span></span>
-          <span class="tag" id="shortdesc">Wähle etwas aus und entdecke!</span>
-        </div>
+    const game = new Phaser.Game(config);
 
-        <table>
-          <thead>
-            <tr>
-              <th>Aktie/Ding</th>
-              <th class="right">Stück</th>
-              <th class="right">Preis</th>
-              <th class="right">Wert</th>
-              <th class="right">Δ heute</th>
-              <th class="right">Gewinn</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
+    class StartScene extends Phaser.Scene {
+      constructor() { super('start'); }
+      create() {
+        this.add.text(GAME_W/2, GAME_H/2 - 70, 'Amelies Einhorn-Glitzer', {
+          fontSize: '32px', color: '#7a0040', stroke: '#fff', strokeThickness: 4
+        }).setOrigin(0.5);
 
-        <div class="notice" style="margin-top:8px;">
-          Hinweis: Preise sind <b>simuliert</b> (vereinfachte Kurven). Nur zum Üben und Spielen – keine echten Käufe.
-        </div>
-      </section>
+        this.add.text(GAME_W/2, GAME_H/2 - 10, 'Tippe irgendwo oder den Knopf, um zu springen!\nFange die 🦄 für Punkte!', {
+          fontSize: '20px', color: '#7a0040', align: 'center', stroke: '#fff', strokeThickness: 3
+        }).setOrigin(0.5);
 
-      <aside class="card">
-        <h3 style="margin-top:0;">Mein Schatz im Verlauf</h3>
-        <canvas id="chart" width="800" height="240"></canvas>
-        <div class="small muted">Letzte 200 „Tage“ (simuliert).</div>
-        <hr style="border:none;border-top:1px solid rgba(0,0,0,.08);margin:16px 0;"/>
+        const startBtn = this.add.text(GAME_W/2, GAME_H/2 + 100, '▶️ Start', {
+          fontSize: '28px', color: '#fff', backgroundColor: '#ff2a7f', padding: {x:20,y:10}
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-        <div class="edu">
-          <div class="box">
-            <h4>Was ist eine Aktie?</h4>
-            <div class="help">Eine Aktie ist ein <b>kleines Stück von einer Firma</b>. Wenn die Firma gut arbeitet, kann dein Stück <b>mehr wert</b> werden. Manchmal wird es auch weniger – das ist normal.</div>
-          </div>
-          <div class="box">
-            <h4>Gewinn & Verlust</h4>
-            <div class="help">Kaufst du etwas für 10 € und es wird 12 €, ist das <b>Gewinn</b> (2 €). Wird es 8 €, ist das <b>Verlust</b> (−2 €). Du siehst es in der Tabelle.</div>
-          </div>
-          <div class="box">
-            <h4>Streuen (wie Süßigkeiten)</h4>
-            <div class="help">Nicht nur eine Sache kaufen! <b>Viele kleine</b> ist besser. Wenn eins fällt, halten die anderen dagegen.</div>
-          </div>
-          <div class="box">
-            <h4>Geduld</h4>
-            <div class="help">Werte hüpfen jeden Tag. <b>Langsam und ruhig</b> ist meist klüger als schnell.</div>
-          </div>
-          <div class="box gold">
-            <h4>🪙 Gold</h4>
-            <div class="help">Gold ist wie ein <b>Funken‑Schatz</b>. Es gehört keiner Firma. Viele Menschen mögen es, wenn sie <b>Sicherheit</b> wollen.</div>
-          </div>
-          <div class="box oil">
-            <h4>🛢️ Öl (Energie)</h4>
-            <div class="help">Öl hilft Autos, Flugzeugen und Fabriken. <b>Preis kann stark schwanken</b>, wenn viel oder wenig gebraucht wird.</div>
-          </div>
-        </div>
-
-        <details style="margin-top:10px;">
-          <summary>⚙️ Eltern‑Infos</summary>
-          <div class="small muted" style="margin-top:8px;">
-            • Keine echten Kurse; alles localStorage unter <code>ameliepf</code>.<br>
-            • LEGO ist ein fiktiver Ticker (nicht börsennotiert).<br>
-            • Gold/Öl hier nur als kindgerechte Platzhalter (keine Anlageempfehlung).
-          </div>
-        </details>
-      </aside>
-    </div>
-  </div>
-
-<script>
-// ---- Kurze Beschreibungen je Auswahl ----
-const DESCRIPTIONS = {
-  DIS: "Disney macht Filme, Serien und Parks – wie Eiskönigin oder Mickey.",
-  MAT: "Mattel macht Barbie, UNO und Hot Wheels – viele Spielsachen.",
-  HAS: "Hasbro macht Spiele wie Monopoly und My Little Pony‑Spielzeug.",
-  MCD: "McDonald’s verkauft Essen – das Happy Meal kennst du!",
-  LEGO:"LEGO baut bunte Stein‑Welten. Hier als fiktive Aktie.",
-  UNICORN:"Einhorn‑Magie! Eine Fantasie‑Aktie nur zum Spaß.",
-  PRETZEL:"Lecker! Eine Bretzel‑Firma als Spaß‑Aktie.",
-  TOYS:"Alles rund um Spielzeug in einer Fantasie‑Aktie.",
-  GOLD:"Gold ist ein Schatz, kein Unternehmen. Viele finden es sicher.",
-  OIL:"Öl ist Energie für viele Dinge. Preise können stark schwanken."
-};
-
-// ---- Sanfte Simulation ----
-function makeSeries(base, amp, trend){
-  return Array.from({length:220}, (_,i)=> base + Math.sin(i/7)*amp + i*trend + (Math.random()-0.5)*(amp*0.25));
-}
-const HIST = {
-  DIS:     makeSeries(95,  3.5, 0.05),
-  MAT:     makeSeries(22,  2.0, 0.03),
-  HAS:     makeSeries(50,  3.0, 0.02),
-  MCD:     makeSeries(260, 2.0, 0.04),
-  LEGO:    makeSeries(80,  2.5, 0.03), // fiktiv
-  UNICORN: makeSeries(40,  6.0, 0.06),
-  PRETZEL: makeSeries(15,  1.5, 0.02),
-  TOYS:    makeSeries(35,  2.8, 0.03),
-  GOLD:    makeSeries(60,  1.2, 0.02), // ruhiger, defensiv
-  OIL:     makeSeries(70,  4.0, 0.00)  // volatiler, seitwärts
-};
-
-// ---- State ----
-const S = {
-  day: 200,
-  cash: 10000,
-  seed: 10000,
-  lots: {},
-  history: []
-};
-
-// ---- Helpers ----
-function fmt(n){ return Number(n).toLocaleString('de-DE', {style:'currency', currency:'EUR'}); }
-const rnd = x => Math.round(x*100)/100;
-function price(t){ const arr=HIST[t]; return rnd(arr[Math.min(S.day, arr.length-1)]); }
-function pricePrev(t){ const arr=HIST[t]; return rnd(arr[Math.max(0, Math.min(S.day-1, arr.length-1))]); }
-
-function sparkle(x,y){
-  const el = document.createElement('div');
-  el.className = 'sparkle';
-  const emojis = ['✨','🌟','💖','🦄','⭐'];
-  el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-  el.style.setProperty('--sx', x+'px');
-  el.style.setProperty('--sy', y+'px');
-  document.body.appendChild(el);
-  setTimeout(()=> el.remove(), 1300);
-}
-
-// ---- Load ----
-(function init(){
-  try { Object.assign(S, JSON.parse(localStorage.getItem('ameliepf')||'null')||{}); } catch(e){}
-  document.querySelector('#seed').value = S.seed;
-  updatePriceBadge();
-  tick();
-})();
-
-function portfolioValue(){
-  let v = S.cash;
-  for(const [t, lot] of Object.entries(S.lots)) v += lot.qty * price(t);
-  return v;
-}
-function save(){ try{ localStorage.setItem('ameliepf', JSON.stringify(S)); } catch(e){} }
-
-function updatePriceBadge(){
-  const t = document.querySelector('#ticker').value;
-  document.querySelector('#price').textContent = fmt(price(t));
-  document.querySelector('#shortdesc').textContent = DESCRIPTIONS[t] || "Entdecke mehr!";
-}
-
-function render(){
-  document.querySelector('#cashStart').textContent = fmt(S.seed);
-  document.querySelector('#cash').textContent = fmt(S.cash);
-  document.querySelector('#total').textContent = fmt(portfolioValue());
-
-  const tbody = document.querySelector('#rows');
-  tbody.innerHTML = '';
-  for(const t of Object.keys(HIST)){
-    const lot = S.lots[t] || {qty:0, cost:0};
-    const p = price(t), pp = pricePrev(t);
-    const value = lot.qty * p;
-    const dayDelta = value - lot.qty * pp;
-    const pl = lot.qty>0 ? (p - lot.cost) * lot.qty : 0;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><b>${t}</b></td>
-      <td class="right">${lot.qty}</td>
-      <td class="right">${fmt(p)}</td>
-      <td class="right">${fmt(value)}</td>
-      <td class="right ${dayDelta>=0? 'value-up':'value-down' }">${dayDelta>=0?'+':''}${fmt(dayDelta)}</td>
-      <td class="right ${pl>=0? 'value-up':'value-down' }">${pl>=0?'+':''}${fmt(pl)}</td>
-      <td class="right"><button data-t="${t}" class="small">Alles verkaufen</button></td>
-    `;
-    tbody.appendChild(tr);
-  }
-}
-
-function drawChart(){
-  const c = document.querySelector('#chart');
-  const ctx = c.getContext('2d');
-  ctx.clearRect(0,0,c.width,c.height);
-  const data = S.history.slice(-200);
-  if(data.length<2) return;
-  const min = Math.min(...data), max = Math.max(...data);
-  const pad = (max-min)*0.1 || 10;
-  const h = c.height-20, w=c.width-20;
-  ctx.strokeStyle = '#b86cff'; ctx.lineWidth = 2;
-  ctx.beginPath();
-  data.forEach((v,i)=>{
-    const x = 10 + i*(w/(data.length-1));
-    const y = 10 + (h - ( (v-(min-pad)) / ((max+pad)-(min-pad)) )*h);
-    i? ctx.lineTo(x,y): ctx.moveTo(x,y);
-  });
-  ctx.stroke();
-}
-
-function tick(){
-  const total = portfolioValue();
-  S.history.push(total);
-  if(S.history.length>400) S.history.shift();
-  render();
-  drawChart();
-  save();
-}
-
-// ---- Events ----
-document.querySelector('#ticker').addEventListener('change', updatePriceBadge);
-
-document.querySelector('#buy').addEventListener('click', (e)=>{
-  const t = document.querySelector('#ticker').value;
-  const q = Math.max(1, parseInt(document.querySelector('#qty').value||'1',10));
-  const p = price(t);
-  const cost = q*p;
-  if(cost > S.cash){ alert('Nicht genug Taschengeld.'); return; }
-  const lot = S.lots[t] || {qty:0, cost:p};
-  const newQty = lot.qty + q;
-  const newCost = newQty>0 ? (lot.qty*lot.cost + q*p)/newQty : p;
-  S.lots[t] = { qty:newQty, cost:rnd(newCost) };
-  S.cash = rnd(S.cash - cost);
-  updatePriceBadge();
-  tick();
-  const r = e.currentTarget.getBoundingClientRect();
-  sparkle(r.left + r.width/2, r.top);
-});
-
-document.querySelector('#sell').addEventListener('click', ()=>{
-  const t = document.querySelector('#ticker').value;
-  const q = Math.max(1, parseInt(document.querySelector('#qty').value||'1',10));
-  const lot = S.lots[t] || {qty:0, cost:0};
-  if(q>lot.qty){ alert('Nicht so viele Stück im Depot.'); return; }
-  const p = price(t);
-  S.cash = rnd(S.cash + q*p);
-  S.lots[t] = { qty: lot.qty - q, cost: lot.cost };
-  tick();
-});
-
-document.querySelector('#rows').addEventListener('click', (e)=>{
-  if(e.target.tagName==='BUTTON'){
-    const t = e.target.getAttribute('data-t');
-    const lot = S.lots[t];
-    if(lot && lot.qty>0){
-      S.cash = rnd(S.cash + lot.qty*price(t));
-      S.lots[t] = {qty:0, cost:lot.cost};
-      tick();
+        startBtn.on('pointerdown', () => {
+          this.scene.start('main');
+        });
+      }
     }
-  }
-});
 
-document.querySelector('#reset').addEventListener('click', ()=>{
-  const seed = Math.max(100, parseInt(document.querySelector('#seed').value||'10000',10));
-  S.seed = seed; S.cash = seed; S.lots = {}; S.history=[]; S.day = 200 + Math.floor(Math.random()*10-5);
-  tick();
-});
+    class MainScene extends Phaser.Scene {
+      constructor() { super('main'); }
 
-// initialize shortdesc
-updatePriceBadge();
-</script>
+      create() {
+        this.score = 0;
+        this.best = +(localStorage.getItem('amelie_best') || 0);
+        this.level = 1;
+        this.collected = 0;
+
+        const groundHeight = 60;
+        this.ground = this.add.rectangle(GAME_W/2, GAME_H - groundHeight/2, GAME_W, groundHeight, 0xffffff, 0.25);
+        this.physics.add.existing(this.ground, true);
+
+        this.playerVisual = this.add.text(140, GAME_H - groundHeight - 40, '💖', { fontSize: '48px' }).setOrigin(0.5);
+        this.player = this.add.circle(this.playerVisual.x, this.playerVisual.y, 22, 0xff2a7f, 0.2);
+        this.physics.add.existing(this.player);
+        this.player.body.setCollideWorldBounds(true);
+        this.player.body.setBounce(0);
+        this.jumpCount = 0;
+
+        this.physics.add.collider(this.player, this.ground, () => { this.jumpCount = 0; });
+
+        // Tutorial-Hinweis über Amelie
+        this.hint = this.add.text(this.playerVisual.x, this.playerVisual.y - 60, 'Das ist Amelie 💖\nTippe oder drücke unten „SPRINGEN“!', {
+          fontSize: '18px', color: '#7a0040', stroke: '#fff', strokeThickness: 3, align: 'center'
+        }).setOrigin(0.5);
+
+        const doJump = () => {
+          if (this.player.body.blocked.down || this.jumpCount < 2) {
+            this.player.body.setVelocityY(-560);
+            this.jumpCount++;
+            this.popParticles(this.player.x, this.player.y+10, 8);
+            if (this.hint && this.hint.active) {
+              this.tweens.add({ targets: this.hint, alpha: 0, duration: 400, onComplete: () => this.hint.destroy() });
+            }
+          }
+        };
+        this.input.on('pointerdown', doJump);
+        this.input.keyboard?.on('keydown-SPACE', doJump);
+
+        // GROßER SPRINGEN-KNOPF
+        const btn = this.add.rectangle(GAME_W - 120, GAME_H - 50, 200, 60, 0xff2a7f, 0.95).setInteractive({ useHandCursor: true });
+        const btnText = this.add.text(btn.x, btn.y, 'SPRINGEN', { fontSize: '20px', color: '#fff', fontStyle: '700' }).setOrigin(0.5);
+        btn.on('pointerdown', () => { btn.setScale(0.96); doJump(); });
+        btn.on('pointerup',   () => { btn.setScale(1); });
+        btn.on('pointerout',  () => { btn.setScale(1); });
+
+        // Gruppe für Einhörner
+        this.unicornBodies = this.physics.add.group();
+
+        this.physics.add.overlap(this.player, this.unicornBodies, (player, uniBody) => {
+          if (!uniBody.active) return;
+          this.collectUnicorn(uniBody);
+        });
+
+        // Glitzer-Partikel
+        this.particles = this.add.particles(0,0, {
+          emitting: false,
+          lifespan: 600,
+          speed: 160,
+          gravityY: 800,
+          scale: { start: 1, end: 0 },
+          tint: [0xff7ab5, 0xffc1df, 0xffffff]
+        });
+
+        this.scoreText = this.add.text(16, 12, 'Punkte: 0', { fontSize: '22px', color: '#7a0040', stroke: '#fff', strokeThickness: 4 });
+        this.bestText  = this.add.text(GAME_W-16, 12, 'Best: '+this.best, { fontSize: '22px', color: '#7a0040', stroke: '#fff', strokeThickness: 4 }).setOrigin(1,0);
+
+        // Häufigere Spawns + klare Höhe
+        this.unicornTimer = this.time.addEvent({ delay: 900, loop: true, callback: () => this.spawnUnicorn(false) });
+
+        this.time.addEvent({ delay: 9000, loop: true, callback: () => { this.level++; } });
+
+        // Startanimation
+        this.time.delayedCall(600, () => doJump());
+      }
+
+      popParticles(x, y, count=8) {
+        this.particles.emitParticleAt(x, y, count);
+      }
+
+      spawnUnicorn(isSuper) {
+        const minY = 120, maxY = 280;
+        const y = Phaser.Math.Between(minY, maxY);
+        const speed = -(200 + this.level * 40);
+
+        const bodyRect = this.add.rectangle(GAME_W + 40, y, isSuper ? 64 : 44, isSuper ? 64 : 44, 0x000000, 0);
+        this.physics.add.existing(bodyRect);
+        bodyRect.body.setAllowGravity(false);
+        bodyRect.body.setVelocityX(speed);
+
+        const emoji = isSuper ? '🦄✨' : '🦄';
+        const txt = this.add.text(bodyRect.x, y, emoji, { fontSize: isSuper ? '56px' : '40px' }).setOrigin(0.5);
+        bodyRect.visual = txt;
+        this.unicornBodies.add(bodyRect);
+
+        bodyRect.update = () => {
+          txt.x = bodyRect.x; txt.y = bodyRect.y;
+          if (bodyRect.x < -60) { txt.destroy(); bodyRect.destroy(); }
+        };
+
+        if (!isSuper) {
+          this.collected++;
+          if (this.collected % 10 === 0) {
+            this.time.delayedCall(400, () => this.spawnUnicorn(true));
+          }
+        }
+      }
+
+      collectUnicorn(uniBody) {
+        if (!uniBody.active) return;
+        const isSuper = (uniBody.visual?.text || '').includes('✨');
+        const pts = isSuper ? 5 : 1;
+        this.score += pts;
+        this.scoreText.setText('Punkte: ' + this.score);
+        if (this.score > this.best) {
+          this.best = this.score; this.bestText.setText('Best: ' + this.best);
+          localStorage.setItem('amelie_best', this.best);
+        }
+        this.popParticles(uniBody.x, uniBody.y, isSuper ? 24 : 12);
+        const pop = this.add.text(uniBody.x, uniBody.y - 24, `+${pts}`, { fontSize: '20px', color: '#7a0040', stroke: '#fff', strokeThickness: 4 }).setOrigin(0.5);
+        this.tweens.add({ targets: pop, y: pop.y - 30, alpha: 0, duration: 500, onComplete: () => pop.destroy() });
+
+        uniBody.visual?.destroy();
+        uniBody.destroy();
+      }
+
+      update() {
+        this.playerVisual.x = this.player.x; this.playerVisual.y = this.player.y - 6;
+        if (this.player.y > GAME_H - 100) this.player.y = GAME_H - 100;
+        this.unicornBodies.children.iterate(child => { if (child && child.update) child.update(); });
+      }
+    }
+
+    game.scene.add('start', StartScene, true);
+    game.scene.add('main', MainScene, false);
+  })();
+  </script>
 </body>
 </html>
